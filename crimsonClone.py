@@ -26,12 +26,12 @@ icon = pygame.image.load('spaceship.png')
 pygame.display.set_icon(icon)
 
 # player
-playerImg = pygame.image.load('player0.png')
-playerX = -1000
+playerImg = pygame.image.load('player.png')
+playerX = 600
 playerY = 800
 playerX_change = 0
 user_text = ''
-kill_count = 0
+#kill_count = 0
 
 
 # enemy
@@ -43,7 +43,7 @@ enemyWord = []
 num_enemies = 7
 
 for i in range(num_enemies):
-    enemyImg.append(pygame.image.load('bullet.png'))
+    enemyImg.append(pygame.image.load('monster.png'))
     enemyWord.append(dictionary[np.random.randint(40)])
     enemyX.append(random.randint(0,1100))
     enemyY.append(random.randint(-100,0))
@@ -55,7 +55,7 @@ bulletImg = pygame.image.load('bullet.png')
 bulletX = 0
 bulletY = 480
 bulletX_change = 0
-bulletY_change = 3  
+bulletY_change = 6
 bullet_state = "ready"
 
 score = 0
@@ -74,7 +74,7 @@ def score_(x,y,score,user_text):
 def enemy(x,y,i):
     text = font.render(enemyWord[i], True, (0,0,255))
     screen.blit(enemyImg[i],(x,y))
-    screen.blit(text,(x,y))
+    screen.blit(text,(x,y+20))
 
 def fire_bullet(x,y):
     global bullet_state
@@ -102,49 +102,46 @@ while 1:
            if event.key == pygame.K_RETURN:
                word = ''.join(user_text)
                if word in enemyWord:
+                  # enemyWord2 = np.array(enemyWord)
+                  # enemyWord2 = enemyWord2[np.array(enemyY).argsort()[::-1]]
+                  # enemyWord2 = list(enemyWord2)
                    i = enemyWord.index(word)
-                   (bulletX,bulletY) = (enemyX[i],enemyY[i])
-                   kill_count += 1
-                   if kill_count > 9:
-                       enemyY_change *= 1.2
-                       kill_count = 0
+                   playerX = enemyX[i]
+                   bulletX = playerX
+                   fire_bullet(bulletX,bulletY)
+                   #(bulletX,bulletY) = (enemyX[i],enemyY[i])
+                   if np.mod(score,10) == 0:
+                       enemyY_change *= 1.15
               # print(word)
                user_text = []
            elif event.key == pygame.K_BACKSPACE:
                user_text = user_text[:-1]
            else:
                user_text += event.unicode
-
-    playerX += playerX_change
-    if playerX <= 0:
-        playerX = 0
-    if playerX >= 768:
-        playerX = 768
         
     for i in range(num_enemies):
         if enemyY[i] > 777:
             for j in range(num_enemies):
                 enemyY[j] = 2000
-            print("Score:",score)
             break
-
+            print("Score:",score)
         enemyY[i] += enemyY_change
             
         collision = isCollision(enemyX[i],enemyY[i],bulletX,bulletY)
         if collision:
             bullet_state = "ready"
-            bulletY = 480
+            bulletY = 800
             enemyX[i] = random.randint(0,768)
             enemyY[i] = random.randint(-300,-50)
             enemyWord[i] = dictionary[np.random.randint(40)]
             score += 1
-            if np.mod(score,5) == 0:
-                enemyX_change  = [i * 1.2 for i in enemyX_change]
+            #if np.mod(score,5) == 0:
+            #    enemyX_change  = [i * 1.2 for i in enemyX_change]
 
         enemy(enemyX[i],enemyY[i],i)
     
-    if bulletY <= 0:
-        bulletY = 480
+    if bulletY <= -300:
+        bulletY = 800
         bullet_state = "ready"
     if bullet_state == "fire":
         fire_bullet(bulletX,bulletY)
@@ -155,7 +152,6 @@ while 1:
     
     player(playerX,playerY)
     score_(20,20,score,user_text)
-    
     
 
     pygame.display.update()
